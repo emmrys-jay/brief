@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  postgres-instance:
+    image: postgres:latest
+    restart: "on-failure"
+    environment:
+      POSTGRES_USER: default
+      POSTGRES_DB: brief
+      POSTGRES_PASSWORD: password
+    container_name: postgres-brief
+    ports:
+      - '5433:5432'
+    # Uncomment the lines below after creating 'postgres/datadir' in root directory
+    #    volumes:
+    #      - /postgres/datadir:.
+    networks:
+      - "my_network"
+
+networks:
+  my_network:
