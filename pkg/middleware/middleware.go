@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-type Headers struct {
-	Authorization string `header:"Authorization"`
-	Token         string `header:"Token"`
-}
-
 // Admin is the middleware for admin-only endpoints
 func Admin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +45,7 @@ func Admin(next http.Handler) http.Handler {
 
 		// Set details from token into context and execute next handler
 		ctx := r.Context()
-		ctx = context.WithValue(r.Context(), "id", claims.ID)
+		ctx = context.WithValue(ctx, "id", claims.ID)
 		ctx = context.WithValue(ctx, "role", claims.Role)
 		ctx = context.WithValue(ctx, "email", claims.Email)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -83,11 +78,41 @@ func Me(next http.Handler) http.Handler {
 
 		// Set details from token in context and execute next handler
 		ctx := r.Context()
-		ctx = context.WithValue(r.Context(), "id", claims.ID)
+		ctx = context.WithValue(ctx, "id", claims.ID)
 		ctx = context.WithValue(ctx, "role", claims.Role)
 		ctx = context.WithValue(ctx, "email", claims.Email)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// Shorten is the middleware for the endpoint to shorten a url
+// /api/v1/url/shorten - POST
+func Shorten(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Get token if available
+		token := getToken(r)
+		if token != "" {
+			claims, err := VerifyToken(token)
+			if err != nil {
+				rd := utility.BuildErrorResponse(http.StatusUnauthorized, constant.StatusFailed,
+					constant.ErrUnauthorized, err.Error(), nil)
+				res, _ := json.Marshal(rd)
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write(res)
+				return
+			}
+
+			// Set details from token in context and execute next handler
+			ctx = context.WithValue(ctx, "id", claims.ID)
+			ctx = context.WithValue(ctx, "role", claims.Role)
+			ctx = context.WithValue(ctx, "email", claims.Email)
+
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+
 }
 
 // getToken contains logic to fetch token from headers

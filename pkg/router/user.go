@@ -10,7 +10,7 @@ import (
 )
 
 // User registers user paths with router 'e'
-func User(r chi.Router, validate *validator.Validate, ApiVersion string, logger *utility.Logger) chi.Router {
+func User(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi.Router {
 
 	userCtrl := user.Controller{Validate: validate, Logger: logger}
 

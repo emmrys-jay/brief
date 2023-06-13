@@ -9,7 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func Health(r chi.Router, validate *validator.Validate, ApiVersion string, logger *utility.Logger) chi.Router {
+func Health(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi.Router {
 
 	health := health.Controller{Validate: validate, Logger: logger}
 

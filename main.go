@@ -70,6 +70,7 @@ func main() {
 	}()
 
 	// Run the server
+	fmt.Printf("Server is now listening on port: %s\n", getConfig.ServerPort)
 	err := server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)

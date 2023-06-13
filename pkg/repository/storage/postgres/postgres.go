@@ -63,6 +63,7 @@ func dsn() string {
 func migrateDB(logger *utility.Logger) error {
 	err := db.AutoMigrate(
 		&model.User{},
+		&model.URL{},
 	)
 	if err != nil {
 		return err

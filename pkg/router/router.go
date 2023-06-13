@@ -23,6 +23,7 @@ func Setup(validate *validator.Validate, logger *utility.Logger) chi.Router {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5))
 	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(middleware.SetHeader("Content-Type", "application/json"))
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -35,8 +36,9 @@ func Setup(validate *validator.Validate, logger *utility.Logger) chi.Router {
 
 	ApiVersion := "v1"
 	r.Route(fmt.Sprintf("/api/%s", ApiVersion), func(r chi.Router) {
-		Health(r, validate, ApiVersion, logger)
-		User(r, validate, ApiVersion, logger)
+		Health(r, validate, logger)
+		User(r, validate, logger)
+		Url(r, validate, logger)
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +49,8 @@ func Setup(validate *validator.Validate, logger *utility.Logger) chi.Router {
 			"status":  http.StatusNotFound,
 		}
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(res)
+		resV, _ := json.Marshal(res)
+		w.Write(resV)
 	})
 
 	return r
