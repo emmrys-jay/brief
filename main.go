@@ -2,6 +2,7 @@ package main
 
 import (
 	pgdb "brief/pkg/repository/storage/postgres"
+	"brief/pkg/repository/storage/redis"
 	"context"
 	"fmt"
 	"log"
@@ -17,15 +18,13 @@ import (
 	"brief/pkg/router"
 
 	"github.com/go-playground/validator/v10"
-	// "brief/pkg/repository/storage/redis"
-	// mdb "brief/pkg/repository/storage/mongo"
+	// rdb "brief/pkg/repository/storage/redis"
 )
 
 func init() {
 	config.Setup()
 	pgdb.ConnectToDB()
 	// redis.SetupRedis() uncomment when you need redis
-	// mdb.ConnectToDB() uncomment or remove if using mongodb
 }
 
 func main() {
@@ -59,6 +58,9 @@ func main() {
 				log.Fatal("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
+
+		// Store counter variable in redis
+		redis.StoreCounter()
 
 		// Trigger graceful shutdown
 		err := server.Shutdown(shutdownCtx)

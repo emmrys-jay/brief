@@ -3,11 +3,13 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"brief/internal/config"
+	"brief/internal/constant"
 	"brief/utility"
 
 	"github.com/go-redis/redis/v8"
@@ -35,6 +37,34 @@ func SetupRedis() {
 	fmt.Println("Redis says: ", pong)
 	Rds = rdb
 	logger.Info("Redis CONNECTION ESTABLISHED")
+
+	// Add a counter to redis to aid hashing algorithm
+	rd := GetRedisDb()
+	cnt, err := rd.RedisGet(constant.CounterKey)
+	if err != nil {
+		if errors.Is(err, redis.ErrClosed) {
+			log.Fatal(err)
+		} else {
+			logger.Info("Redis COUNTER VARIABLE NOT SET")
+		}
+		return
+	}
+
+	var counter int64
+	json.Unmarshal(cnt, &counter)
+	utility.Counter = counter
+}
+
+// StoreCounter stores the current value of the counter variable in redis
+func StoreCounter() {
+	logger := utility.NewLogger()
+	rd := GetRedisDb()
+	err := rd.RedisSet(constant.CounterKey, utility.Counter)
+	if err != nil {
+		logger.Error("Redis COULD NOT STORE COUNTER")
+		return
+	}
+	logger.Info("Redis SUCCESSFULLY STORED REDIS COUNTER")
 }
 
 type Redis struct {

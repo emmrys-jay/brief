@@ -1,12 +1,19 @@
 package utility
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"crypto/md5"
+	"encoding/base64"
+	"fmt"
 	"math/rand"
+	"sync/atomic"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var saltLen = 8
+
+var Counter int64
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -35,4 +42,18 @@ func randomSalt() string {
 	}
 
 	return salt
+}
+
+func GetURLHash(id, url string) (string, error) {
+
+	hash := md5.New()
+	if _, err := hash.Write([]byte(id)); err != nil {
+		return "", nil
+	}
+	md5Hash := hash.Sum([]byte(url))
+	cntStr := fmt.Sprint(Counter)
+	atomic.AddInt64(&Counter, 1) // Increment counter
+
+	base64Str := base64.URLEncoding.EncodeToString(append(md5Hash, []byte(cntStr)...))
+	return base64Str[:7], nil
 }
