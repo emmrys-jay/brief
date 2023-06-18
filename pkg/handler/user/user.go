@@ -34,7 +34,8 @@ func (base *Controller) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := user.Register(req); err != nil {
+	token, err := user.Register(req)
+	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
 		res, _ := json.Marshal(rd)
@@ -43,7 +44,10 @@ func (base *Controller) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rd := utility.BuildSuccessResponse(http.StatusCreated, "user created successfully", req)
+	rd := utility.BuildSuccessResponse(http.StatusCreated, "user created successfully", map[string]interface{}{
+		"token": token,
+		"user":  req,
+	})
 	res, _ := json.Marshal(rd)
 	w.WriteHeader(http.StatusCreated)
 	w.Write(res)
@@ -153,35 +157,6 @@ func (base *Controller) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "updated successfully", req)
-	res, _ := json.Marshal(rd)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-}
-
-// VerifyMe - /users/verify - PATCH
-func (base *Controller) VerifyMe(w http.ResponseWriter, r *http.Request) {
-	uId := r.Context().Value("id")
-
-	if uId == nil {
-		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
-			constant.ErrBinding, "user ID not found", nil)
-		res, _ := json.Marshal(rd)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(res)
-		return
-	}
-
-	usr, err := user.Verify(uId.(string))
-	if err != nil {
-		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
-			constant.ErrRequest, err.Error(), nil)
-		res, _ := json.Marshal(rd)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(res)
-		return
-	}
-
-	rd := utility.BuildSuccessResponse(http.StatusOK, "verified user successfully", usr)
 	res, _ := json.Marshal(rd)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)

@@ -16,7 +16,7 @@ func Url(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi
 
 	// Free Endpoint
 	r.Group(func(r chi.Router) {
-		r.Get("/url/{hash}", urlCtrl.Redirect)
+		r.Get("/{hash}", urlCtrl.Redirect)
 	})
 
 	// Shorten endpoint

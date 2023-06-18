@@ -27,7 +27,6 @@ func User(r chi.Router, validate *validator.Validate, logger *utility.Logger) ch
 
 		r.Get("/users", userCtrl.GetMe)
 		r.Patch("/users", userCtrl.UpdateMe)
-		r.Patch("/users/verify", userCtrl.VerifyMe)
 		r.Patch("/users/reset-password", userCtrl.ResetPassword)
 	})
 
@@ -38,7 +37,7 @@ func User(r chi.Router, validate *validator.Validate, logger *utility.Logger) ch
 		r.Get("/users/get-all", userCtrl.GetAll)
 		r.Get("/users/{idOrEmail}", userCtrl.GetUserByIdOrEmail)
 		r.Patch("/users/lock/{idOrEmail}", userCtrl.LockUser)
-		r.Patch("/users/lock/{idOrEmail}", userCtrl.UnlockUser)
+		r.Patch("/users/unlock/{idOrEmail}", userCtrl.UnlockUser)
 	})
 
 	return r

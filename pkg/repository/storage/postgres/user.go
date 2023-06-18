@@ -50,20 +50,8 @@ func (p *Postgres) UpdateUser(ctx context.Context, id string, user *model.User) 
 
 	// Ensure 'is_verified', 'is_locked', 'password', 'email' and 'salt' cannot be updated using this function
 	return db.Model(user).Clauses(clause.Returning{}).
-		Omit("is_verified", "is_locked", "password", "salt", "email").
+		Omit("is_locked", "password", "salt", "email").
 		Where("id = ?", id).Updates(user).Error
-}
-
-// VerifyUser verifies a user with 'id'
-func (p *Postgres) VerifyUser(ctx context.Context, id string) (*model.User, error) {
-	db, cancel := p.DBWithTimeout(ctx)
-	defer cancel()
-
-	var user model.User
-	user.ID = id
-	err := db.Model(&user).Clauses(clause.Returning{}).Update("is_verified", true).Error
-
-	return &user, err
 }
 
 // ResetPassword resets the 'password' and 'salt' of a user with 'id'
@@ -79,7 +67,7 @@ func (p *Postgres) ResetPassword(ctx context.Context, id string, rp *model.Reset
 	return &user, err
 }
 
-// LockUnlock sets the 'is_locked' field of a user to 'false'
+// LockUnlock sets the 'is_locked' field of a user to 'false' or 'false'
 func (p *Postgres) LockUnlock(ctx context.Context, idOrEmail string, isLocked bool) (*model.User, error) {
 	db, cancel := p.DBWithTimeout(ctx)
 	defer cancel()

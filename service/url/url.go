@@ -1,10 +1,14 @@
 package url
 
-import "brief/internal/model"
+import (
+	"brief/internal/model"
+)
 
 // Link contains business logic to shorten and store a URL
 func Shorten(url *model.URL) error {
+	if url.Hash == "" {
 
+	}
 	return nil
 }
 

@@ -12,12 +12,12 @@ func (p *Postgres) CreateURL(ctx context.Context, url *model.URL) error {
 	return db.Create(url).Error
 }
 
-// GetURL fetches a url entry from the database using its 'short_url'
-func (p *Postgres) GetURL(ctx context.Context, short_url string) (*model.URL, error) {
+// GetURL fetches a url entry from the database using its 'hash'
+func (p *Postgres) GetURL(ctx context.Context, hash string) (*model.URL, error) {
 	db, cancel := p.DBWithTimeout(ctx)
 	defer cancel()
 
 	var url model.URL
-	err := db.First(&url, "short_url = ?", short_url).Error
+	err := db.First(&url, "hash = ?", hash).Error
 	return &url, err
 }

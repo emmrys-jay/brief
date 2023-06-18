@@ -15,11 +15,11 @@ import (
 )
 
 // Register contains business logic for registering a new user
-func Register(user *model.User, isAdmin ...bool) error {
+func Register(user *model.User, isAdmin ...bool) (string, error) {
 	// Hash password
 	hash, salt, err := utility.HashPassword(user.Password)
 	if err != nil {
-		return fmt.Errorf("could not hash user password, got error: %w", err)
+		return "", fmt.Errorf("could not hash user password, got error: %w", err)
 	}
 
 	// Set/Modify some fields from the request struct
@@ -35,30 +35,22 @@ func Register(user *model.User, isAdmin ...bool) error {
 		}
 	}
 
-	// ### Uncomment the lines below to retrieve token to be sent in email ###
-
-	// token, err := middleware.CreateToken(user.ID, user.Email, user.Role)
-	// if err != nil {
-	// 	return fmt.Errorf("could not create token, got error: %w", err)
-	// }
-
-	// TODO: Send Verification Email to User
-	// err = utility.SendMail(user.Email, "index.html", &utility.EmailData{Token: token, Subject: "Test"})
-	// if err != nil {
-	// 	return fmt.Errorf("could not send email, got error: %w", err)
-	// }
+	token, err := middleware.CreateToken(user.ID, user.Email, user.Role)
+	if err != nil {
+		return "", fmt.Errorf("could not create token, got error: %w", err)
+	}
 
 	db := postgres.GetDB()
 	err = db.CreateUser(context.TODO(), user)
 	if err != nil {
-		return fmt.Errorf("could not create user, got error: %w", err)
+		return "", fmt.Errorf("could not create user, got error: %w", err)
 	}
 
 	// Omit password and salt from response
 	user.Password = ""
 	user.Salt = ""
 
-	return nil
+	return token, nil
 }
 
 // Login contains business logic for logging in
@@ -84,17 +76,6 @@ func Login(userLogin *model.UserLogin) (*model.LoginResponse, error) {
 	// Omit password and salt from response
 	user.Password = ""
 	user.Salt = ""
-
-	// Ensure that user is verified and not locked
-	if !user.IsVerified || user.IsLocked {
-		var err error
-		if !user.IsVerified {
-			err = fmt.Errorf("user not verified")
-		} else {
-			err = fmt.Errorf("cannot login, user is currently locked")
-		}
-		return nil, err
-	}
 
 	return &model.LoginResponse{
 		Token: token,
@@ -147,21 +128,6 @@ func Update(id string, user *model.User) error {
 	user.Salt = ""
 
 	return nil
-}
-
-// Verify contains business logic to verify a user
-func Verify(id string) (*model.User, error) {
-	db := postgres.GetDB()
-	user, err := db.VerifyUser(context.TODO(), id)
-	if err != nil {
-		return nil, fmt.Errorf("could not verify user, got error: %w", err)
-	}
-
-	// Omit password and salt from response
-	user.Password = ""
-	user.Salt = ""
-
-	return user, nil
 }
 
 // ResetPassword contains business logic to reset a user's password
