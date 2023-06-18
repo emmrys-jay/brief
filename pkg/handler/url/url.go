@@ -24,6 +24,12 @@ func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch and set user ID if present
+	uId := r.Context().Value("id")
+	if uId != nil {
+		req.UserID = uId.(string)
+	}
+
 	if err := base.Validate.Struct(req); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrValidation, utility.ValidationResponse(err, base.Validate), nil)

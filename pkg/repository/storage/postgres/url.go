@@ -21,3 +21,13 @@ func (p *Postgres) GetURL(ctx context.Context, hash string) (*model.URL, error) 
 	err := db.First(&url, "hash = ?", hash).Error
 	return &url, err
 }
+
+// GetUrls fetches all url's made by a user with 'userID'
+func (p *Postgres) GetUrls(ctx context.Context, userID string) ([]model.URL, error) {
+	db, cancel := p.DBWithTimeout(ctx)
+	defer cancel()
+
+	var urls []model.URL
+	err := db.Find(&urls, "user_id = ?", userID).Error
+	return urls, err
+}
