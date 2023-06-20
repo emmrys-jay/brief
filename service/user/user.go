@@ -68,6 +68,11 @@ func Login(userLogin *model.UserLogin) (*model.LoginResponse, error) {
 		return nil, fmt.Errorf("invalid password")
 	}
 
+	// Ensure that user is not locked
+	if user.IsLocked {
+		return nil, fmt.Errorf("cannot login, user is currently locked")
+	}
+
 	token, err := middleware.CreateToken(user.ID, user.Email, user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("could not create token")
@@ -118,8 +123,18 @@ func GetAll() ([]model.User, error) {
 // Update contains business logic to update a user
 func Update(id string, user *model.User) error {
 	db := postgres.GetDB()
-	err := db.UpdateUser(context.TODO(), id, user)
+
+	fUser, err := db.GetUser(context.TODO(), id)
 	if err != nil {
+		return fmt.Errorf("user not found")
+	}
+
+	// Ensure that user is not locked
+	if fUser.IsLocked {
+		return fmt.Errorf("cannot update, user is currently locked")
+	}
+
+	if err := db.UpdateUser(context.TODO(), id, user); err != nil {
 		return fmt.Errorf("could not update user, got error: %w", err)
 	}
 
@@ -132,6 +147,17 @@ func Update(id string, user *model.User) error {
 
 // ResetPassword contains business logic to reset a user's password
 func ResetPassword(id string, rp *model.ResetPassword) (*model.User, error) {
+	db := postgres.GetDB()
+	fUser, err := db.GetUser(context.TODO(), id)
+	if err != nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	// Ensure that user is not locked
+	if fUser.IsLocked {
+		return nil, fmt.Errorf("cannot update, user is currently locked")
+	}
+
 	hashedPassword, salt, err := utility.HashPassword(rp.Password)
 	if err != nil {
 		return nil, fmt.Errorf("could not hash password, got error: %w", err)
@@ -141,7 +167,6 @@ func ResetPassword(id string, rp *model.ResetPassword) (*model.User, error) {
 	rp.Password = hashedPassword
 	rp.Salt = salt
 
-	db := postgres.GetDB()
 	user, err := db.ResetPassword(context.TODO(), id, rp)
 	if err != nil {
 		return nil, fmt.Errorf("could not reset password, got error: %w", err)
