@@ -9,15 +9,17 @@ import (
 )
 
 type Configuration struct {
-	ServerPort string `mapstructure:"SERVER_PORT"`
-	SecretKey  string `mapstructure:"SECRET_KEY"`
-	RedisHost  string `mapstructure:"REDIS_HOST"`
-	RedisPort  string `mapstructure:"REDIS_PORT"`
-	PGHost     string `mapstructure:"PG_HOST"`
-	PGPort     string `mapstructure:"PG_PORT"`
-	PGDatabase string `mapstructure:"PG_DATABASE"`
-	PGUser     string `mapstructure:"PG_USER"`
-	PGPassword string `mapstructure:"PG_PASSWORD"`
+	ServerPort    string `mapstructure:"SERVER_PORT"`
+	SecretKey     string `mapstructure:"SECRET_KEY"`
+	RedisHost     string `mapstructure:"REDIS_HOST"`
+	RedisPort     string `mapstructure:"REDIS_PORT"`
+	PGHost        string `mapstructure:"PG_HOST"`
+	PGPort        string `mapstructure:"PG_PORT"`
+	PGDatabase    string `mapstructure:"PG_DATABASE"`
+	PGUser        string `mapstructure:"PG_USER"`
+	PGPassword    string `mapstructure:"PG_PASSWORD"`
+	AdminID       string `mapstructure:"ADMIN_ID"`
+	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
 }
 
 // Setup initialize configuration

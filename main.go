@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"brief/service/user"
 	"brief/utility"
 
 	"brief/internal/config"
@@ -69,6 +70,11 @@ func main() {
 		shutdownCancel()
 		serverCancel()
 	}()
+
+	// Create Admin User
+	if err := user.CreateAdminUser(logger); err != nil {
+		log.Fatal(err)
+	}
 
 	// Run the server
 	fmt.Printf("Server is now listening on port: %s\n", getConfig.ServerPort)
