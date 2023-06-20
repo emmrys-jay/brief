@@ -95,9 +95,8 @@ func (base *Controller) Login(w http.ResponseWriter, r *http.Request) {
 
 // GetMe - /users - GET
 func (base *Controller) GetMe(w http.ResponseWriter, r *http.Request) {
-	uId := r.Context().Value("id")
-
-	if uId == nil {
+	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
+	if uInfo == nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrBinding, "user ID not found", nil)
 		res, _ := json.Marshal(rd)
@@ -106,7 +105,8 @@ func (base *Controller) GetMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := user.Get(uId.(string))
+	uId := uInfo.(*model.ContextInfo).ID
+	usr, err := user.Get(uId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -126,9 +126,9 @@ func (base *Controller) GetMe(w http.ResponseWriter, r *http.Request) {
 func (base *Controller) UpdateMe(w http.ResponseWriter, r *http.Request) {
 
 	req := new(model.User)
-	uId := r.Context().Value("id")
+	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
 
-	if uId == nil {
+	if uInfo == nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrBinding, "user ID not found", nil)
 		res, _ := json.Marshal(rd)
@@ -146,7 +146,8 @@ func (base *Controller) UpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := user.Update(uId.(string), req)
+	uId := uInfo.(*model.ContextInfo).ID
+	err := user.Update(uId, req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -196,9 +197,9 @@ func (base *Controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 func (base *Controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	req := new(model.ResetPassword)
-	uId := r.Context().Value("id")
+	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
 
-	if uId == nil {
+	if uInfo == nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrBinding, "user ID not found", nil)
 		res, _ := json.Marshal(rd)
@@ -216,7 +217,8 @@ func (base *Controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := user.ResetPassword(uId.(string), req)
+	uId := uInfo.(*model.ContextInfo).ID
+	usr, err := user.ResetPassword(uId, req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)

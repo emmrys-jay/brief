@@ -2,7 +2,6 @@ package main
 
 import (
 	pgdb "brief/pkg/repository/storage/postgres"
-	"brief/pkg/repository/storage/redis"
 	"context"
 	"fmt"
 	"log"
@@ -60,7 +59,7 @@ func main() {
 		}()
 
 		// Store counter variable in redis
-		redis.StoreCounter()
+		// redis.StoreCounter()
 
 		// Trigger graceful shutdown
 		err := server.Shutdown(shutdownCtx)

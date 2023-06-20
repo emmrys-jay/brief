@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"brief/internal/constant"
+	"brief/internal/model"
 	"brief/utility"
 	"context"
 	"encoding/json"
@@ -33,7 +34,7 @@ func Admin(next http.Handler) http.Handler {
 			return
 		}
 
-		// Check if request is not from an admin
+		// Check if request is from an admin
 		if claims.Role != constant.Roles[constant.Admin] {
 			rd := utility.BuildErrorResponse(http.StatusUnauthorized, constant.StatusFailed,
 				constant.ErrUnauthorized, "cannot access this endpoint", nil)
@@ -45,9 +46,11 @@ func Admin(next http.Handler) http.Handler {
 
 		// Set details from token into context and execute next handler
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "id", claims.ID)
-		ctx = context.WithValue(ctx, "role", claims.Role)
-		ctx = context.WithValue(ctx, "email", claims.Email)
+		ctx = context.WithValue(ctx, struct{}{}, &model.ContextInfo{
+			ID:    claims.ID,
+			Role:  claims.Role,
+			Email: claims.Email,
+		})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -78,9 +81,11 @@ func Me(next http.Handler) http.Handler {
 
 		// Set details from token in context and execute next handler
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "id", claims.ID)
-		ctx = context.WithValue(ctx, "role", claims.Role)
-		ctx = context.WithValue(ctx, "email", claims.Email)
+		ctx = context.WithValue(ctx, struct{}{}, &model.ContextInfo{
+			ID:    claims.ID,
+			Role:  claims.Role,
+			Email: claims.Email,
+		})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -105,9 +110,11 @@ func Shorten(next http.Handler) http.Handler {
 			}
 
 			// Set details from token in context and execute next handler
-			ctx = context.WithValue(ctx, "id", claims.ID)
-			ctx = context.WithValue(ctx, "role", claims.Role)
-			ctx = context.WithValue(ctx, "email", claims.Email)
+			ctx = context.WithValue(ctx, struct{}{}, &model.ContextInfo{
+				ID:    claims.ID,
+				Role:  claims.Role,
+				Email: claims.Email,
+			})
 
 		}
 		next.ServeHTTP(w, r.WithContext(ctx))

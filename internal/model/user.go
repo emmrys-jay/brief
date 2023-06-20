@@ -33,3 +33,9 @@ type ResetPassword struct {
 type ForgotPassword struct {
 	Email string `json:"email,omitempty"`
 }
+
+type ContextInfo struct {
+	ID    string
+	Role  int
+	Email string
+}

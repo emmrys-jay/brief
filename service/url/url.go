@@ -1,6 +1,7 @@
 package url
 
 import (
+	"brief/internal/constant"
 	"brief/internal/model"
 	"brief/pkg/repository/storage/postgres"
 	"brief/utility"
@@ -11,6 +12,23 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+// Redirect contains business logic to redirect a shortened url to the original url
+func Redirect(hash string) (*model.URL, error) {
+
+	db := postgres.GetDB()
+	url, err := db.GetURL(context.TODO(), hash)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("url not found")
+		}
+		return nil, fmt.Errorf("could not fetch url, got error %w", err)
+	}
+
+	return url, nil
+}
+
+// ADMIN & USER
 
 // Link contains business logic to shorten and store a URL
 func Shorten(url *model.URL) error {
@@ -38,14 +56,43 @@ func Shorten(url *model.URL) error {
 			if !errors.Is(err, gorm.ErrDuplicatedKey) {
 				return fmt.Errorf("could not store url, got error %w", err)
 			}
-			return fmt.Errorf("hash '%s' already exists", url.Hash)
+			return fmt.Errorf("oops, '%s' already exists", url.Hash)
 		}
 	}
 
 	return nil
 }
 
-// GetURLs contains business logic to fetch all URL's stored by a user
+// Delete contains business logic to delete a user's saved URL or a random url by its 'id'
+func Delete(ctxInfo *model.ContextInfo, urlId string) (*model.URL, error) {
+
+	db := postgres.GetDB()
+	if ctxInfo.Role != constant.Roles[constant.Admin] {
+		url, err := db.GetURLById(context.TODO(), urlId)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return nil, fmt.Errorf("url not found")
+			}
+			return nil, fmt.Errorf("could not fetch url, got error %w", err)
+		}
+
+		if url.UserID != ctxInfo.ID {
+			return nil, fmt.Errorf("unauthorized to perform this action")
+		}
+	}
+
+	url, err := db.DeleteUrl(context.TODO(), urlId)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("url not found")
+		}
+		return nil, fmt.Errorf("could not delete url, got error %w", err)
+	}
+
+	return url, nil
+}
+
+// GetURLs contains business logic to fetch all URL's created by a user with 'userID'
 func GetURLs(userID string) ([]model.URL, error) {
 
 	db := postgres.GetDB()
@@ -57,20 +104,16 @@ func GetURLs(userID string) ([]model.URL, error) {
 	return urls, nil
 }
 
-// Delete contains business logic to delete a user's saved URL
-func Delete(userId, urlId string) (*model.URL, error) {
-
-	return nil, nil
-}
+// ADMIN
 
 // GetAll contains business logic to fetch all URL's
 func GetAll() ([]model.URL, error) {
 
-	return nil, nil
-}
+	db := postgres.GetDB()
+	urls, err := db.GetAll(context.TODO())
+	if err != nil {
+		return nil, fmt.Errorf("could not get urls, got error : %w", err)
+	}
 
-// DeleteUrlByID contains business logic to delete a random url sepecified by 'id'
-func DeleteUrlByID(id string) (*model.URL, error) {
-
-	return nil, nil
+	return urls, nil
 }

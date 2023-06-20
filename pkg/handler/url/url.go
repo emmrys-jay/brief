@@ -11,6 +11,23 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Redirect - /api/v1/{hash} - GET
+func (base *Controller) Redirect(w http.ResponseWriter, r *http.Request) {
+	hash := chi.URLParam(r, "hash")
+
+	url, err := url.Redirect(hash)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
+			constant.ErrRequest, err.Error(), nil)
+		res, _ := json.Marshal(rd)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(res)
+		return
+	}
+
+	http.Redirect(w, r, url.LongURL, http.StatusTemporaryRedirect)
+}
+
 // Shorten - /api/v1/url/shorten - POST
 func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 	req := new(model.URL)
@@ -25,9 +42,9 @@ func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fetch and set user ID if present
-	uId := r.Context().Value("id")
-	if uId != nil {
-		req.UserID = uId.(string)
+	uInfo := r.Context().Value(struct{}{})
+	if uInfo != nil {
+		req.UserID = uInfo.(*model.ContextInfo).ID
 	}
 
 	if err := base.Validate.Struct(req); err != nil {
@@ -54,16 +71,11 @@ func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// Redirect - /api/v1/{hash} - GET
-func (base *Controller) Redirect(w http.ResponseWriter, r *http.Request) {
-
-}
-
 // GetUrls - /api/v1/url - GET
 func (base *Controller) GetUrls(w http.ResponseWriter, r *http.Request) {
-	uId := r.Context().Value("id")
+	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
 
-	if uId == nil {
+	if uInfo == nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrBinding, "user ID not found", nil)
 		res, _ := json.Marshal(rd)
@@ -72,7 +84,8 @@ func (base *Controller) GetUrls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	urls, err := url.GetURLs(uId.(string))
+	uId := uInfo.(*model.ContextInfo).ID
+	urls, err := url.GetURLs(uId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -91,9 +104,9 @@ func (base *Controller) GetUrls(w http.ResponseWriter, r *http.Request) {
 // Delete - /api/v1/url/{id} - DELETE
 func (base *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	urlId := chi.URLParam(r, "id")
-	userId := r.Context().Value("id")
+	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
 
-	if userId == nil {
+	if uInfo == nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrBinding, "user ID not found", nil)
 		res, _ := json.Marshal(rd)
@@ -102,7 +115,8 @@ func (base *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := url.Delete(userId.(string), urlId)
+	uContextInfo := uInfo.(*model.ContextInfo)
+	url, err := url.Delete(uContextInfo, urlId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -152,25 +166,6 @@ func (base *Controller) GetUrlsByUserID(w http.ResponseWriter, r *http.Request) 
 	}
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "", urls)
-	res, _ := json.Marshal(rd)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-}
-
-// DeleteUrlByID - /api/v1/url/{id} - DELETE
-func (base *Controller) DeleteUrlByID(w http.ResponseWriter, r *http.Request) {
-	uID := chi.URLParam(r, "id")
-	urls, err := url.DeleteUrlByID(uID)
-	if err != nil {
-		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
-			constant.ErrRequest, err.Error(), nil)
-		res, _ := json.Marshal(rd)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(res)
-		return
-	}
-
-	rd := utility.BuildSuccessResponse(http.StatusOK, "successfully deleted url", urls)
 	res, _ := json.Marshal(rd)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)

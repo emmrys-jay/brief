@@ -30,7 +30,7 @@ func Url(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi
 		r.Use(mdw.Me) // user middleware
 
 		r.Get("/url", urlCtrl.GetUrls)
-		r.Delete("/url", urlCtrl.Delete)
+		r.Delete("/url/{id}", urlCtrl.Delete)
 	})
 
 	// Admin endpoints
@@ -39,7 +39,6 @@ func Url(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi
 
 		r.Get("/url/get-all", urlCtrl.GetAll)
 		r.Get("/url/{user-id}", urlCtrl.GetUrlsByUserID)
-		r.Delete("/url/{id}", urlCtrl.DeleteUrlByID)
 	})
 
 	return r
