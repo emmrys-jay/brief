@@ -27,6 +27,29 @@ func init() {
 	// redis.SetupRedis() uncomment when you need redis
 }
 
+//	@title			Brief
+//	@version		1.0
+//	@description	URL Shortener.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+//	@securityDefinitions.apikey	JWTToken
+//	@in							header
+//	@name						Authorization
+//	@description				JWT token
+
+//	@externalDocs.description	OpenAPI
+//	@externalDocs.url			https://swagger.io/resources/open-api/
+
 func main() {
 	//Load config
 	logger := utility.NewLogger()

@@ -7,7 +7,7 @@ Brief makes your url's as `brief` as the word: `brief`
 - [ ] API Testing
 - [ ] Caching with Redis
 - [ ] Analytics
-- [ ] Swagger Documentation
+- [x] Swagger Documentation
 - [ ] Postman Documentation
 
 # Requires
