@@ -1,5 +1,5 @@
 # brief
-Brief makes your url's as `brief` as the word: `brief`
+Brief makes your url's as `brief` as the word: `brief` (with a few added chars 🤪)
 
 ## Features
 - [x] User Authentication
@@ -9,6 +9,7 @@ Brief makes your url's as `brief` as the word: `brief`
 - [ ] Analytics
 - [x] Swagger Documentation
 - [ ] Postman Documentation
+- [ ] Continuos Integration/Delivery (CI/CD)
 
 # Requires
 `go 1.17+` `postgresql` `redis` `docker (optional)`
