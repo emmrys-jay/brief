@@ -3,14 +3,14 @@ package router
 import (
 	"brief/pkg/handler/user"
 	mdw "brief/pkg/middleware"
-	"brief/utility"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 )
 
 // User registers user paths with router 'e'
-func User(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi.Router {
+func User(r chi.Router, validate *validator.Validate, logger *log.Logger) chi.Router {
 
 	userCtrl := user.Controller{Validate: validate, Logger: logger}
 
@@ -18,7 +18,6 @@ func User(r chi.Router, validate *validator.Validate, logger *utility.Logger) ch
 	r.Group(func(r chi.Router) {
 		r.Post("/users", userCtrl.Register)
 		r.Post("/users/login", userCtrl.Login)
-		r.Post("/users/forgot-password", userCtrl.ForgotPassword)
 	})
 
 	// User endpoints

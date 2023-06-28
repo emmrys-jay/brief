@@ -3,13 +3,12 @@ package router
 import (
 	"brief/pkg/handler/health"
 
-	"brief/utility"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 )
 
-func Health(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi.Router {
+func Health(r chi.Router, validate *validator.Validate, logger *log.Logger) chi.Router {
 
 	health := health.Controller{Validate: validate, Logger: logger}
 

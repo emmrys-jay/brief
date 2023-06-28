@@ -3,11 +3,10 @@ package postgres
 import (
 	"brief/internal/config"
 	"brief/internal/model"
-	"brief/utility"
 	"context"
-	"fmt"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,20 +26,19 @@ func GetDB() *Postgres {
 }
 
 func ConnectToDB() *gorm.DB {
-	logger := utility.NewLogger()
+	logger := log.New()
 
 	database, err := gorm.Open(postgres.Open(dsn()), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("could not connect to postgres, got error: %s", err)
+		logger.Fatalf("could not connect to postgres, got error: %s", err)
 	}
 	db = database
 
 	if err := migrateDB(logger); err != nil {
-		log.Fatalf("could not run db migrations, got error: %s", err)
+		logger.Fatalf("could not run db migrations, got error: %s", err)
 	}
 
 	// IF EVERYTHING IS OKAY, THEN CONNECTION IS ESTABLISHED
-	fmt.Println("POSTGRES CONNECTION ESTABLISHED")
 	logger.Info("POSTGRES CONNECTION ESTABLISHED")
 
 	return db
@@ -60,7 +58,7 @@ func dsn() string {
 }
 
 // migrateDB creates db schemas
-func migrateDB(logger *utility.Logger) error {
+func migrateDB(logger *log.Logger) error {
 	err := db.AutoMigrate(
 		&model.User{},
 		&model.URL{},

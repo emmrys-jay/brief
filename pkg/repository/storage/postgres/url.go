@@ -11,7 +11,7 @@ import (
 func (p *Postgres) CreateURL(ctx context.Context, url *model.URL) error {
 	db, cancel := p.DBWithTimeout(ctx)
 	defer cancel()
-	return db.Create(url).Error
+	return db.Model(&model.User{ID: url.UserID}).Association("Urls").Append(url)
 }
 
 // GetURL fetches a url entry from the database using its 'hash'
@@ -39,8 +39,10 @@ func (p *Postgres) GetUrls(ctx context.Context, userID string) ([]model.URL, err
 	db, cancel := p.DBWithTimeout(ctx)
 	defer cancel()
 
+	user := model.User{ID: userID}
 	var urls []model.URL
-	err := db.Find(&urls, "user_id = ?", userID).Error
+
+	err := db.Model(&user).Association("Urls").Find(&urls)
 	return urls, err
 }
 
@@ -60,6 +62,6 @@ func (p *Postgres) DeleteUrl(ctx context.Context, id string) (*model.URL, error)
 	defer cancel()
 
 	url := model.URL{ID: id}
-	err := db.Model(&url).Clauses(clause.Returning{}).Delete(url).Error
+	err := db.Model(&url).Clauses(clause.Returning{}).Delete(&url).Error
 	return &url, err
 }

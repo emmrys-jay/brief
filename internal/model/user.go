@@ -13,6 +13,7 @@ type User struct {
 	Salt      string    `json:"salt,omitempty" gorm:"column:salt;not null;type:varchar(50)"`
 	CreatedAt time.Time `json:"created_at" gorm:"column:created_at;index"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at"`
+	Urls      []URL     `json:"-" gorm:"foreignKey:user_id" swaggerignore:"true"`
 }
 
 type UserLogin struct {
@@ -27,7 +28,7 @@ type LoginResponse struct {
 
 type ResetPassword struct {
 	Password string `json:"password,omitempty"`
-	Salt     string `json:"-"`
+	Salt     string `json:"-" swaggerignore:"true"`
 }
 
 type ForgotPassword struct {

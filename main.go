@@ -4,7 +4,6 @@ import (
 	pgdb "brief/pkg/repository/storage/postgres"
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,7 +11,8 @@ import (
 	"time"
 
 	"brief/service/user"
-	"brief/utility"
+
+	log "github.com/sirupsen/logrus"
 
 	"brief/internal/config"
 	"brief/pkg/router"
@@ -52,7 +52,7 @@ func init() {
 
 func main() {
 	//Load config
-	logger := utility.NewLogger()
+	logger := log.New()
 	getConfig := config.GetConfig()
 	validatorRef := validator.New()
 	e := router.Setup(validatorRef, logger)

@@ -1,12 +1,11 @@
 package url
 
 import (
-	"brief/utility"
-
 	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 )
 
 type Controller struct {
 	Validate *validator.Validate
-	Logger   *utility.Logger
+	Logger   *log.Logger
 }

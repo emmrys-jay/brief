@@ -50,7 +50,7 @@ func (p *Postgres) UpdateUser(ctx context.Context, id string, user *model.User) 
 
 	// Ensure 'is_verified', 'is_locked', 'password', 'email' and 'salt' cannot be updated using this function
 	return db.Model(user).Clauses(clause.Returning{}).
-		Omit("is_locked", "password", "salt", "email").
+		Omit("is_locked", "password", "salt", "email", "role").
 		Where("id = ?", id).Updates(user).Error
 }
 

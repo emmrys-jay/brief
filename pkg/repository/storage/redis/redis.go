@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"brief/internal/config"
@@ -13,6 +12,7 @@ import (
 	"brief/utility"
 
 	"github.com/go-redis/redis/v8"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 )
 
 func SetupRedis() {
-	logger := utility.NewLogger()
+	logger := log.New()
 	getConfig := config.GetConfig()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%v:%v", getConfig.RedisHost, getConfig.RedisPort),
@@ -30,11 +30,11 @@ func SetupRedis() {
 	})
 
 	if err := rdb.Ping(Ctx).Err(); err != nil {
-		fmt.Printf("%v:%v", getConfig.RedisHost, getConfig.RedisPort)
-		log.Fatalln("Redis db error: ", err)
+		logger.Printf("%v:%v", getConfig.RedisHost, getConfig.RedisPort)
+		logger.Fatalln("Redis db error: ", err)
 	}
 	pong, _ := rdb.Ping(Ctx).Result()
-	fmt.Println("Redis says: ", pong)
+	logger.Println("Redis says: ", pong)
 	Rds = rdb
 	logger.Info("Redis CONNECTION ESTABLISHED")
 
@@ -43,7 +43,7 @@ func SetupRedis() {
 	cnt, err := rd.RedisGet(constant.CounterKey)
 	if err != nil {
 		if errors.Is(err, redis.ErrClosed) {
-			log.Fatal(err)
+			logger.Fatal(err)
 		} else {
 			logger.Info("Redis COUNTER VARIABLE NOT SET")
 		}
@@ -57,7 +57,7 @@ func SetupRedis() {
 
 // StoreCounter stores the current value of the counter variable in redis
 func StoreCounter() {
-	logger := utility.NewLogger()
+	logger := log.New()
 	rd := GetRedisDb()
 	err := rd.RedisSet(constant.CounterKey, utility.Counter)
 	if err != nil {

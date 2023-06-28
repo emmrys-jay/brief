@@ -3,21 +3,16 @@ package router
 import (
 	"brief/pkg/handler/url"
 	mdw "brief/pkg/middleware"
-	"brief/utility"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 )
 
 // Url registers url paths with router 'r'
-func Url(r chi.Router, validate *validator.Validate, logger *utility.Logger) chi.Router {
+func Url(r chi.Router, validate *validator.Validate, logger *log.Logger) chi.Router {
 
 	urlCtrl := url.Controller{Validate: validate, Logger: logger}
-
-	// Free Endpoint
-	r.Group(func(r chi.Router) {
-		r.Get("/{hash}", urlCtrl.Redirect)
-	})
 
 	// Shorten endpoint
 	r.Group(func(r chi.Router) {

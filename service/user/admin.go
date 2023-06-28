@@ -10,11 +10,13 @@ import (
 	"errors"
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
+
 	"gorm.io/gorm"
 )
 
 // CreateAdminUser creates an admin user if one doesn't exist
-func CreateAdminUser(logger *utility.Logger) error {
+func CreateAdminUser(logger *log.Logger) error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

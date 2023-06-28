@@ -7,6 +7,5 @@ type URL struct {
 	LongURL   string    `json:"long_url,omitempty" gorm:"column:long_url;not null" validate:"required"`
 	Hash      string    `json:"hash,omitempty" gorm:"column:hash;not null;unique;index"`
 	UserID    string    `json:"user_id,omitempty" gorm:"column:user_id;index"`
-	User      User      `json:"-" gorm:"constraint:OnDelete:SET NULL"`
 	CreatedAt time.Time `json:"created_at" gorm:"column:created_at;index"`
 }

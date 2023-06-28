@@ -1,6 +1,7 @@
 package url
 
 import (
+	"brief/internal/config"
 	"brief/internal/constant"
 	"brief/internal/model"
 	"brief/pkg/repository/storage/postgres"
@@ -8,6 +9,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	urlPkg "net/url"
+	"regexp"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -31,11 +37,31 @@ func Redirect(hash string) (*model.URL, error) {
 // ADMIN & USER
 
 // Link contains business logic to shorten and store a URL
-func Shorten(url *model.URL) error {
+func Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error {
+
+	{
+		// Check that URL is valid
+		_, err := urlPkg.Parse(url.LongURL)
+		if err != nil {
+			return fmt.Errorf("invalid url specified: '%v'", url.LongURL)
+		}
+
+		if err := ping(url.LongURL); err != nil {
+			return fmt.Errorf("invalid url specified: '%v', got error: '%v'", url.LongURL, err)
+		}
+	}
+
+	// URL shortening logic
 	url.ID = uuid.NewString()
+	if ctxInfo != nil {
+		url.UserID = ctxInfo.ID
+	} else {
+		url.UserID = config.GetConfig().AdminID
+	}
 	db := postgres.GetDB()
 
 	if url.Hash == "" {
+		// Run indefinite loop to prevent possible collision
 		for {
 			hash, err := utility.GetURLHash(url.ID, url.LongURL)
 			if err != nil {
@@ -60,6 +86,15 @@ func Shorten(url *model.URL) error {
 		}
 	}
 
+	hashUrl := urlPkg.URL{
+		Host:   r.Host,
+		Scheme: r.URL.Scheme,
+		Path:   url.Hash,
+	}
+	if hashUrl.Scheme == "" {
+		hashUrl.Scheme = "https"
+	}
+	url.Hash = hashUrl.String()
 	return nil
 }
 
@@ -116,4 +151,29 @@ func GetAll() ([]model.URL, error) {
 	}
 
 	return urls, nil
+}
+
+func ping(url string) error {
+	client := http.Client{
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{Timeout: 2 * time.Second}).DialContext,
+		},
+	}
+
+	req, err := http.NewRequest("HEAD", url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	regx, _ := regexp.Compile("^20")
+	ok := regx.Match([]byte(fmt.Sprint(resp.StatusCode)))
+	if !ok {
+		return fmt.Errorf("invalid")
+	}
+	return nil
 }

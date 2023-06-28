@@ -28,6 +28,7 @@ func Register(user *model.User, isAdmin ...bool) (string, error) {
 		user.Password = hash
 		user.Salt = salt
 		user.CreatedAt = time.Now()
+		user.IsLocked = false
 		if (len(isAdmin) > 0) && isAdmin[0] {
 			user.Role = constant.Roles[constant.Admin]
 		} else {
