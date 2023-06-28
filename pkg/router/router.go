@@ -6,16 +6,23 @@ import (
 	"net/http"
 	"time"
 
-	"brief/utility"
+	"brief/internal/config"
+	"brief/pkg/handler/url"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+
+	_ "brief/docs"
+
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
-func Setup(validate *validator.Validate, logger *utility.Logger) chi.Router {
+func Setup(validate *validator.Validate, logger *log.Logger) chi.Router {
 	r := chi.NewRouter()
 
 	// Middlewares
@@ -35,12 +42,26 @@ func Setup(validate *validator.Validate, logger *utility.Logger) chi.Router {
 	}))
 
 	ApiVersion := "v1"
+
+	// Redirect Endpoint
+	urlCtrl := url.Controller{Validate: validate, Logger: logger}
+	r.Group(func(r chi.Router) {
+		r.Get("/{hash}", urlCtrl.Redirect)
+	})
+
+	// Endpoints starting with "/api/v1"
 	r.Route(fmt.Sprintf("/api/%s", ApiVersion), func(r chi.Router) {
 		Health(r, validate, logger)
 		User(r, validate, logger)
 		Url(r, validate, logger)
 	})
 
+	// Swagger endpoint
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:"+config.GetConfig().ServerPort+"/swagger/doc.json"), //The url pointing to API definition
+	))
+
+	// Not found
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		res := map[string]interface{}{
 			"name":    "Not Found",
