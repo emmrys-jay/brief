@@ -12,7 +12,17 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Register - /users - POST
+//	Register
+//
+// @Summary		register a user
+// @Description	register a user
+// @Tags			User
+// @Accept			json
+// @Produce		json
+// @Param			user	body		model.User	true	"User"
+// @Success		201		{object}	utility.Response{data=model.User}
+// @Failure		400		{object}	utility.Response
+// @Router			/users [post]
 func (base *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	req := new(model.User)
 
@@ -54,7 +64,17 @@ func (base *Controller) Register(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Login - /users/login - POST
+//	Login
+//
+// @Summary		log in
+// @Description	log in
+// @Tags			User
+// @Accept			json
+// @Produce		json
+// @Param			userInfo	body		model.UserLogin	true	"Login Info"
+// @Success		201		{object}	utility.Response{data=model.User}
+// @Failure		400		{object}	utility.Response
+// @Router			/users/login [post]
 func (base *Controller) Login(w http.ResponseWriter, r *http.Request) {
 	req := new(model.UserLogin)
 
@@ -93,7 +113,18 @@ func (base *Controller) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// GetMe - /users - GET
+//	GetMe
+//
+// @Summary		get me
+// @Description	get ne
+// @Tags			User
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	utility.Response{data=model.User}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/users [get]
+// @Security		JWTToken
 func (base *Controller) GetMe(w http.ResponseWriter, r *http.Request) {
 	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
 	if uInfo == nil {
@@ -122,7 +153,19 @@ func (base *Controller) GetMe(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// UpdateMe - /users - PATCH
+//	UpdateMe
+//
+// @Summary		update a user
+// @Description	update a user
+// @Tags			User
+// @Accept			json
+// @Produce		json
+// @Param			update	body		model.User	true	"User Update"
+// @Success		200		{object}	utility.Response{data=model.User}
+// @Failure		400		{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/users [patch]
+// @Security		JWTToken
 func (base *Controller) UpdateMe(w http.ResponseWriter, r *http.Request) {
 
 	req := new(model.User)
@@ -163,37 +206,19 @@ func (base *Controller) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// ForgotPassword - /users/forgot-password - POST
-func (base *Controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
-
-	req := new(model.ForgotPassword)
-
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
-			constant.ErrBinding, err.Error(), nil)
-		res, _ := json.Marshal(rd)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(res)
-		return
-	}
-
-	err := user.ForgotPassword(req)
-	if err != nil {
-		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
-			constant.ErrRequest, err.Error(), nil)
-		res, _ := json.Marshal(rd)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(res)
-		return
-	}
-
-	rd := utility.BuildSuccessResponse(http.StatusOK, "email sent successfully", "")
-	res, _ := json.Marshal(rd)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-}
-
-// ResetPassword - /users/reset-password - PATCH
+//	ResetPassword
+//
+// @Summary		update a user's password
+// @Description	update a user's password
+// @Tags			User
+// @Accept			json
+// @Produce		json
+// @Param			update	body		model.ResetPassword	true	"Password Update"
+// @Success		200		{object}	utility.Response{data=model.User}
+// @Failure		400		{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/users/reset-password [patch]
+// @Security		JWTToken
 func (base *Controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	req := new(model.ResetPassword)
@@ -236,7 +261,18 @@ func (base *Controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 // ADMIN ENDPOINTS
 
-// GetAll - /users/get-all - GET
+//	Get All
+//
+// @Summary		list all users - Admin
+// @Description	list all users - Admin
+// @Tags			User - Admin
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	utility.Response{data=[]model.User}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/users/get-all [get]
+// @Security		JWTToken
 func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	usrs, err := user.GetAll()
@@ -255,7 +291,19 @@ func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// GetUserByIdOrEmail - /users/:idOrEmail - GET
+//	Get User By ID or Email
+//
+// @Summary		get user - Admin
+// @Description	get user - Admin
+// @Tags			User - Admin
+// @Accept			json
+// @Produce		json
+// @Param			idOrEmail		path		string					true	"User ID or Email"
+// @Success		200	{object}	utility.Response{data=model.User}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/users/{idOrEmail} [get]
+// @Security		JWTToken
 func (base *Controller) GetUserByIdOrEmail(w http.ResponseWriter, r *http.Request) {
 	idOrEmail := chi.URLParam(r, "idOrEmail")
 	usr, err := user.Get(idOrEmail)
@@ -274,7 +322,19 @@ func (base *Controller) GetUserByIdOrEmail(w http.ResponseWriter, r *http.Reques
 	w.Write(res)
 }
 
-// LockUser - /users/lock/:idOrEmail - PATCH
+//	Lock User
+//
+// @Summary		lock user - Admin
+// @Description	lock user - Admin
+// @Tags			User - Admin
+// @Accept			json
+// @Produce		json
+// @Param			idOrEmail		path		string					true	"User ID or Email"
+// @Success		200	{object}	utility.Response{data=model.User}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/users/lock/{idOrEmail} [patch]
+// @Security		JWTToken
 func (base *Controller) LockUser(w http.ResponseWriter, r *http.Request) {
 	idOrEmail := chi.URLParam(r, "idOrEmail")
 	user, err := user.LockUser(idOrEmail)
@@ -293,7 +353,19 @@ func (base *Controller) LockUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// UnlockUser - /users/unlock/:idOrEmail - PATCH
+//	Unlock User
+//
+// @Summary		unlock user - Admin
+// @Description	unlock user - Admin
+// @Tags			User - Admin
+// @Accept			json
+// @Produce		json
+// @Param			idOrEmail		path		string					true	"User ID or Email"
+// @Success		200	{object}	utility.Response{data=model.User}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/users/unlock/{idOrEmail} [patch]
+// @Security		JWTToken
 func (base *Controller) UnlockUser(w http.ResponseWriter, r *http.Request) {
 	idOrEmail := chi.URLParam(r, "idOrEmail")
 	user, err := user.UnlockUser(idOrEmail)

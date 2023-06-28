@@ -28,7 +28,18 @@ func (base *Controller) Redirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url.LongURL, http.StatusTemporaryRedirect)
 }
 
-// Shorten - /api/v1/url/shorten - POST
+//	Shorten
+//
+// @Summary		shorten a url
+// @Description	shorten a url
+// @Tags			URL
+// @Accept			json
+// @Produce		json
+// @Param			url	body		model.URL	true	"URL"
+// @Success		201		{object}	utility.Response{data=model.URL}
+// @Failure		400		{object}	utility.Response
+// @Router			/url/shorten [post]
+// @Security		JWTToken
 func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 	req := new(model.URL)
 
@@ -41,10 +52,11 @@ func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch and set user ID if present
+	// Fetch user information from context
 	uInfo := r.Context().Value(struct{}{})
-	if uInfo != nil {
-		req.UserID = uInfo.(*model.ContextInfo).ID
+	ctxInfo, ok := uInfo.(*model.ContextInfo)
+	if !ok {
+		ctxInfo = nil
 	}
 
 	if err := base.Validate.Struct(req); err != nil {
@@ -56,7 +68,7 @@ func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := url.Shorten(req); err != nil {
+	if err := url.Shorten(req, ctxInfo, r); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
 		res, _ := json.Marshal(rd)
@@ -71,7 +83,18 @@ func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// GetUrls - /api/v1/url - GET
+//	Get Url's
+//
+// @Summary		get all my urls
+// @Description	get all my urls
+// @Tags			URL
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	utility.Response{data=[]model.URL}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/url [get]
+// @Security		JWTToken
 func (base *Controller) GetUrls(w http.ResponseWriter, r *http.Request) {
 	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
 
@@ -101,7 +124,19 @@ func (base *Controller) GetUrls(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// Delete - /api/v1/url/{id} - DELETE
+//	Delete
+//
+// @Summary		delete my url
+// @Description	delete my url
+// @Tags			URL
+// @Accept			json
+// @Produce		json
+// @Param			id		path		string					true	"url ID"
+// @Success		200	{object}	utility.Response{data=[]model.URL}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/url/{id} [delete]
+// @Security		JWTToken
 func (base *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	urlId := chi.URLParam(r, "id")
 	uInfo := r.Context().Value(struct{}{}) // fetch user's info from context
@@ -134,7 +169,18 @@ func (base *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 
 // ADMIN ENDPOINTS
 
-// GetAll - /api/v1/url/get-all - GET
+//	Get All
+//
+// @Summary		list all urls - Admin
+// @Description	list all urls - Admin
+// @Tags			URL - Admin
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	utility.Response{data=[]model.User}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/url/get-all [get]
+// @Security		JWTToken
 func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	urls, err := url.GetAll()
 	if err != nil {
@@ -152,7 +198,19 @@ func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-// GetUrlsByUserID - /api/v1/url/{user-id} - GET
+//	Get Urls by User ID
+//
+// @Summary		get urls by a user - Admin
+// @Description	get urls by a user - Admin
+// @Tags			URL - Admin
+// @Accept			json
+// @Produce		json
+// @Param			user-id		path		string					true	"user ID"
+// @Success		200	{object}	utility.Response{data=[]model.User}
+// @Failure		400	{object}	utility.Response
+// @Failure		401		{object}	utility.Response
+// @Router			/url/get-all/{user-id} [get]
+// @Security		JWTToken
 func (base *Controller) GetUrlsByUserID(w http.ResponseWriter, r *http.Request) {
 	uID := chi.URLParam(r, "user-id")
 	urls, err := url.GetURLs(uID)

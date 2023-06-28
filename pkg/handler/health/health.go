@@ -9,14 +9,27 @@ import (
 	"brief/service/ping"
 	"brief/utility"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/go-playground/validator/v10"
 )
 
 type Controller struct {
 	Validate *validator.Validate
-	Logger   *utility.Logger
+	Logger   *log.Logger
 }
 
+// Post godoc
+//
+//	@Summary		check api health
+//	@Description	check api health
+//	@Tags			Health
+//	@Accept			json
+//	@Produce		json
+//	@Param			ping	body		model.Ping	true	"Ping"
+//	@Success		200		{object}	utility.Response
+//	@Failure		400		{object}	utility.Response
+//	@Router			/health [post]
 func (base *Controller) Post(w http.ResponseWriter, r *http.Request) {
 	var req model.Ping
 
@@ -48,10 +61,20 @@ func (base *Controller) Post(w http.ResponseWriter, r *http.Request) {
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "ping successfull", req.Message)
 	res, _ := json.Marshal(rd)
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 }
 
+// Get godoc
+//
+//	@Summary		check api health
+//	@Description	check api health
+//	@Tags			Health
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	utility.Response
+//	@Failure		400	{object}	utility.Response
+//	@Router			/health [get]
 func (base *Controller) Get(w http.ResponseWriter, r *http.Request) {
 	if !ping.ReturnTrue() {
 		rd := utility.BuildErrorResponse(http.StatusInternalServerError, "error", "ping failed", fmt.Errorf("ping failed"), nil)
@@ -64,7 +87,6 @@ func (base *Controller) Get(w http.ResponseWriter, r *http.Request) {
 	base.Logger.Info("ping successfull")
 	rd := utility.BuildSuccessResponse(http.StatusOK, "ping successfull", map[string]interface{}{"user": "user object"})
 	res, _ := json.Marshal(rd)
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(http.StatusOK)
 	w.Write(res)
-	return
 }
