@@ -50,9 +50,10 @@ func dsn() string {
 	pgUser := config.GetConfig().PGUser
 	pgDB := config.GetConfig().PGDatabase
 	pgPassword := config.GetConfig().PGPassword
+	pgSSL := config.GetConfig().PGSSLMode
 
 	dsn := "host=" + pgHost + " user=" + pgUser +
-		" password=" + pgPassword + " dbname=" + pgDB + " port=" + pgPort + " sslmode=disable"
+		" password=" + pgPassword + " dbname=" + pgDB + " port=" + pgPort + " sslmode=" + pgSSL
 
 	return dsn
 }

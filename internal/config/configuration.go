@@ -15,6 +15,7 @@ type Configuration struct {
 	PGDatabase    string `mapstructure:"PG_DATABASE"`
 	PGUser        string `mapstructure:"PG_USER"`
 	PGPassword    string `mapstructure:"PG_PASSWORD"`
+	PGSSLMode     string `mapstructure:"PG_SSL_MODE"`
 	AdminID       string `mapstructure:"ADMIN_ID"`
 	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
 }
