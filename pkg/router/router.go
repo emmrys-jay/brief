@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"time"
 
+	"brief/internal/config"
 	"brief/pkg/handler/url"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -43,6 +45,10 @@ func Setup(validate *validator.Validate, logger *log.Logger) chi.Router {
 	// Redirect Endpoint
 	urlCtrl := url.Controller{Validate: validate, Logger: logger}
 	r.Group(func(r chi.Router) {
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Server is running"))
+		})
 		r.Get("/{hash}", urlCtrl.Redirect)
 	})
 
@@ -54,9 +60,9 @@ func Setup(validate *validator.Validate, logger *log.Logger) chi.Router {
 	})
 
 	// Swagger endpoint
-	// r.Get("/swagger/*", httpSwagger.Handler(
-	// 	httpSwagger.URL("http://localhost:"+config.GetConfig().ServerPort+"/swagger/doc.json"), //The url pointing to API definition
-	// ))
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:"+config.GetConfig().ServerPort+"/swagger/doc.json"), //The url pointing to API definition
+	))
 
 	// Not found
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
