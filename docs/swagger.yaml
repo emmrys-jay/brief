@@ -76,7 +76,7 @@ definitions:
       status:
         type: string
     type: object
-host: localhost:8080
+host: brief.up.railway.app
 info:
   contact:
     email: support@swagger.io
