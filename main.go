@@ -59,7 +59,7 @@ func main() {
 
 	// The HTTP Server
 	server := &http.Server{
-		Addr:    fmt.Sprintf("127.0.0.1:%s", getConfig.ServerPort),
+		Addr:    fmt.Sprintf("0.0.0.0:%s", getConfig.ServerPort),
 		Handler: e,
 	}
 

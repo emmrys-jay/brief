@@ -6,7 +6,7 @@ import (
 )
 
 type Configuration struct {
-	ServerPort    string `mapstructure:"SERVER_PORT"`
+	ServerPort    string `mapstructure:"PORT"`
 	SecretKey     string `mapstructure:"SECRET_KEY"`
 	RedisHost     string `mapstructure:"REDIS_HOST"`
 	RedisPort     string `mapstructure:"REDIS_PORT"`
@@ -29,7 +29,7 @@ func Setup() {
 	var configuration *Configuration
 	logger := log.New()
 
-	viper.SetConfigName("sample")
+	viper.SetConfigName("mine")
 	viper.SetConfigType("env")
 	viper.AddConfigPath(".")
 
