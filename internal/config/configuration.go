@@ -29,9 +29,8 @@ func Setup() {
 	var configuration *Configuration
 	logger := log.New()
 
-	viper.SetConfigName("mine")
+	viper.SetConfigFile("ENV")
 	viper.SetConfigType("env")
-	viper.AddConfigPath(".")
 
 	// Overwrite file env's from environment
 	viper.AutomaticEnv()

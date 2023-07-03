@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
-	"brief/internal/config"
 	"brief/pkg/handler/url"
 
 	log "github.com/sirupsen/logrus"
@@ -61,7 +61,7 @@ func Setup(validate *validator.Validate, logger *log.Logger) chi.Router {
 
 	// Swagger endpoint
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://0.0.0.0:"+config.GetConfig().ServerPort+"/swagger/doc.json"), //The url pointing to API definition
+		httpSwagger.URL("http://0.0.0.0:"+os.Getenv("PORT")+"/swagger/doc.json"), //The url pointing to API definition
 	))
 
 	// Not found
