@@ -3,7 +3,6 @@ package user
 import (
 	"brief/internal/constant"
 	"brief/internal/model"
-	"brief/service/user"
 	"encoding/json"
 	"net/http"
 
@@ -44,7 +43,7 @@ func (base *Controller) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := user.Register(req)
+	token, err := base.UserService.Register(req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -96,7 +95,7 @@ func (base *Controller) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := user.Login(req)
+	usr, err := base.UserService.Login(req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -137,7 +136,7 @@ func (base *Controller) GetMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uId := uInfo.(*model.ContextInfo).ID
-	usr, err := user.Get(uId)
+	usr, err := base.UserService.Get(uId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -190,7 +189,7 @@ func (base *Controller) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uId := uInfo.(*model.ContextInfo).ID
-	err := user.Update(uId, req)
+	err := base.UserService.Update(uId, req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -243,7 +242,7 @@ func (base *Controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uId := uInfo.(*model.ContextInfo).ID
-	usr, err := user.ResetPassword(uId, req)
+	usr, err := base.UserService.ResetPassword(uId, req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -275,7 +274,7 @@ func (base *Controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 // @Security		JWTToken
 func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 
-	usrs, err := user.GetAll()
+	usrs, err := base.UserService.GetAll()
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -306,7 +305,7 @@ func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Security		JWTToken
 func (base *Controller) GetUserByIdOrEmail(w http.ResponseWriter, r *http.Request) {
 	idOrEmail := chi.URLParam(r, "idOrEmail")
-	usr, err := user.Get(idOrEmail)
+	usr, err := base.UserService.Get(idOrEmail)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -337,7 +336,7 @@ func (base *Controller) GetUserByIdOrEmail(w http.ResponseWriter, r *http.Reques
 // @Security		JWTToken
 func (base *Controller) LockUser(w http.ResponseWriter, r *http.Request) {
 	idOrEmail := chi.URLParam(r, "idOrEmail")
-	user, err := user.LockUser(idOrEmail)
+	user, err := base.UserService.LockUser(idOrEmail)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -368,7 +367,7 @@ func (base *Controller) LockUser(w http.ResponseWriter, r *http.Request) {
 // @Security		JWTToken
 func (base *Controller) UnlockUser(w http.ResponseWriter, r *http.Request) {
 	idOrEmail := chi.URLParam(r, "idOrEmail")
-	user, err := user.UnlockUser(idOrEmail)
+	user, err := base.UserService.UnlockUser(idOrEmail)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)

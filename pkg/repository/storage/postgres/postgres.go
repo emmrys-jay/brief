@@ -3,6 +3,7 @@ package postgres
 import (
 	"brief/internal/config"
 	"brief/internal/model"
+	"brief/pkg/repository/storage"
 	"context"
 	"time"
 
@@ -21,7 +22,7 @@ var (
 	generalQueryTimeout = 60 * time.Second
 )
 
-func GetDB() *Postgres {
+func GetDB() storage.StorageRepository {
 	return &Postgres{db}
 }
 

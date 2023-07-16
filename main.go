@@ -10,8 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"brief/service/user"
-
 	log "github.com/sirupsen/logrus"
 
 	"brief/internal/config"
@@ -59,7 +57,7 @@ func main() {
 
 	// The HTTP Server
 	server := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT")),
+		Addr:    fmt.Sprintf("0.0.0.0:%s", getConfig.ServerPort),
 		Handler: e,
 	}
 
@@ -93,11 +91,6 @@ func main() {
 		shutdownCancel()
 		serverCancel()
 	}()
-
-	// Create Admin User
-	if err := user.CreateAdminUser(logger); err != nil {
-		log.Fatal(err)
-	}
 
 	// Run the server
 	fmt.Printf("Server is now listening on port: %s\n", getConfig.ServerPort)

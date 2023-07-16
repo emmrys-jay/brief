@@ -1,12 +1,14 @@
 package config
 
 import (
+	"os"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 type Configuration struct {
-	ServerPort    string `mapstructure:"PORT"`
+	ServerPort    string `mapstructure:"SERVER_PORT"`
 	SecretKey     string `mapstructure:"SECRET_KEY"`
 	RedisHost     string `mapstructure:"REDIS_HOST"`
 	RedisPort     string `mapstructure:"REDIS_PORT"`
@@ -43,6 +45,10 @@ func Setup() {
 	err := viper.Unmarshal(&configuration)
 	if err != nil {
 		logger.Fatalf("Unable to decode into struct, %v", err)
+	}
+
+	if port := os.Getenv("PORT"); port != "" {
+		configuration.ServerPort = port
 	}
 
 	Config = configuration

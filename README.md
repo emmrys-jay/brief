@@ -55,4 +55,4 @@ following in a separate bash shell.
 [http://localhost:8080/swagger/index.html#](http://localhost:8080/swagger/index.html#)
 
 - View postman documentation for the API at 
-[Postman link]()
+[Postman link](https://documenter.getpostman.com/view/20046026/2s946feYbR)

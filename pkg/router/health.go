@@ -2,6 +2,7 @@ package router
 
 import (
 	"brief/pkg/handler/health"
+	healthSrv "brief/service/ping"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -10,7 +11,8 @@ import (
 
 func Health(r chi.Router, validate *validator.Validate, logger *log.Logger) chi.Router {
 
-	health := health.Controller{Validate: validate, Logger: logger}
+	hService := healthSrv.NewHealthService()
+	health := health.NewController(validate, logger, hService)
 
 	r.Post("/health", health.Post)
 	r.Get("/health", health.Get)

@@ -3,7 +3,6 @@ package url
 import (
 	"brief/internal/constant"
 	"brief/internal/model"
-	"brief/service/url"
 	"brief/utility"
 	"encoding/json"
 	"net/http"
@@ -15,7 +14,7 @@ import (
 func (base *Controller) Redirect(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
-	url, err := url.Redirect(hash)
+	url, err := base.UrlService.Redirect(hash)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -68,7 +67,7 @@ func (base *Controller) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := url.Shorten(req, ctxInfo, r); err != nil {
+	if err := base.UrlService.Shorten(req, ctxInfo, r); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
 		res, _ := json.Marshal(rd)
@@ -108,7 +107,7 @@ func (base *Controller) GetUrls(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uId := uInfo.(*model.ContextInfo).ID
-	urls, err := url.GetURLs(uId)
+	urls, err := base.UrlService.GetURLs(uId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -151,7 +150,7 @@ func (base *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uContextInfo := uInfo.(*model.ContextInfo)
-	url, err := url.Delete(uContextInfo, urlId)
+	url, err := base.UrlService.Delete(uContextInfo, urlId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -182,7 +181,7 @@ func (base *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 // @Router			/url/get-all [get]
 // @Security		JWTToken
 func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
-	urls, err := url.GetAll()
+	urls, err := base.UrlService.GetAll()
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)
@@ -213,7 +212,7 @@ func (base *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Security		JWTToken
 func (base *Controller) GetUrlsByUserID(w http.ResponseWriter, r *http.Request) {
 	uID := chi.URLParam(r, "user-id")
-	urls, err := url.GetURLs(uID)
+	urls, err := base.UrlService.GetURLs(uID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, constant.StatusFailed,
 			constant.ErrRequest, err.Error(), nil)

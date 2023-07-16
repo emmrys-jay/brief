@@ -4,7 +4,7 @@ import (
 	"brief/internal/config"
 	"brief/internal/constant"
 	"brief/internal/model"
-	"brief/pkg/repository/storage/postgres"
+	"brief/pkg/repository/storage"
 	"brief/utility"
 	"context"
 	"errors"
@@ -19,11 +19,26 @@ import (
 	"gorm.io/gorm"
 )
 
-// Redirect contains business logic to redirect a shortened url to the original url
-func Redirect(hash string) (*model.URL, error) {
+type UrlService interface {
+	Redirect(hash string) (*model.URL, error)
+	Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error
+	Delete(ctxInfo *model.ContextInfo, urlId string) (*model.URL, error)
+	GetURLs(userID string) ([]model.URL, error)
+	GetAll() ([]model.URL, error)
+}
 
-	db := postgres.GetDB()
-	url, err := db.GetURL(context.TODO(), hash)
+type urlService struct {
+	dbRepo storage.StorageRepository
+}
+
+func NewUrlService(dbRepo storage.StorageRepository) UrlService {
+	return &urlService{dbRepo: dbRepo}
+}
+
+// Redirect contains business logic to redirect a shortened url to the original url
+func (u *urlService) Redirect(hash string) (*model.URL, error) {
+
+	url, err := u.dbRepo.GetURL(context.TODO(), hash)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("url not found")
@@ -37,7 +52,7 @@ func Redirect(hash string) (*model.URL, error) {
 // ADMIN & USER
 
 // Link contains business logic to shorten and store a URL
-func Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error {
+func (u *urlService) Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error {
 
 	{
 		// Check that URL is valid
@@ -58,7 +73,6 @@ func Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error 
 	} else {
 		url.UserID = config.GetConfig().AdminID
 	}
-	db := postgres.GetDB()
 
 	if url.Hash == "" {
 		// Run indefinite loop to prevent possible collision
@@ -69,7 +83,7 @@ func Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error 
 			}
 			url.Hash = hash
 
-			if err := db.CreateURL(context.TODO(), url); err != nil {
+			if err := u.dbRepo.CreateURL(context.TODO(), url); err != nil {
 				if !errors.Is(err, gorm.ErrDuplicatedKey) {
 					return fmt.Errorf("could not store url, got error %w", err)
 				}
@@ -78,7 +92,7 @@ func Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error 
 			}
 		}
 	} else {
-		if err := db.CreateURL(context.TODO(), url); err != nil {
+		if err := u.dbRepo.CreateURL(context.TODO(), url); err != nil {
 			if !errors.Is(err, gorm.ErrDuplicatedKey) {
 				return fmt.Errorf("could not store url, got error %w", err)
 			}
@@ -99,11 +113,10 @@ func Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http.Request) error 
 }
 
 // Delete contains business logic to delete a user's saved URL or a random url by its 'id'
-func Delete(ctxInfo *model.ContextInfo, urlId string) (*model.URL, error) {
+func (u *urlService) Delete(ctxInfo *model.ContextInfo, urlId string) (*model.URL, error) {
 
-	db := postgres.GetDB()
 	if ctxInfo.Role != constant.Roles[constant.Admin] {
-		url, err := db.GetURLById(context.TODO(), urlId)
+		url, err := u.dbRepo.GetURLById(context.TODO(), urlId)
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
 				return nil, fmt.Errorf("url not found")
@@ -116,7 +129,7 @@ func Delete(ctxInfo *model.ContextInfo, urlId string) (*model.URL, error) {
 		}
 	}
 
-	url, err := db.DeleteUrl(context.TODO(), urlId)
+	url, err := u.dbRepo.DeleteUrl(context.TODO(), urlId)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("url not found")
@@ -128,10 +141,9 @@ func Delete(ctxInfo *model.ContextInfo, urlId string) (*model.URL, error) {
 }
 
 // GetURLs contains business logic to fetch all URL's created by a user with 'userID'
-func GetURLs(userID string) ([]model.URL, error) {
+func (u *urlService) GetURLs(userID string) ([]model.URL, error) {
 
-	db := postgres.GetDB()
-	urls, err := db.GetUrls(context.TODO(), userID)
+	urls, err := u.dbRepo.GetUrls(context.TODO(), userID)
 	if err != nil {
 		return nil, fmt.Errorf("could not get urls, got error : %w", err)
 	}
@@ -142,10 +154,9 @@ func GetURLs(userID string) ([]model.URL, error) {
 // ADMIN
 
 // GetAll contains business logic to fetch all URL's
-func GetAll() ([]model.URL, error) {
+func (u *urlService) GetAll() ([]model.URL, error) {
 
-	db := postgres.GetDB()
-	urls, err := db.GetAll(context.TODO())
+	urls, err := u.dbRepo.GetAll(context.TODO())
 	if err != nil {
 		return nil, fmt.Errorf("could not get urls, got error : %w", err)
 	}

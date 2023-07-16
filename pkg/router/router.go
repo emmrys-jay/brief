@@ -7,8 +7,6 @@ import (
 	"os"
 	"time"
 
-	"brief/pkg/handler/url"
-
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -42,15 +40,14 @@ func Setup(validate *validator.Validate, logger *log.Logger) chi.Router {
 
 	ApiVersion := "v1"
 
-	// Redirect Endpoint
-	urlCtrl := url.Controller{Validate: validate, Logger: logger}
-	r.Group(func(r chi.Router) {
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Server is running"))
-		})
-		r.Get("/{hash}", urlCtrl.Redirect)
+	// Liveness endpoint
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Server is running"))
 	})
+
+	// Redirect Endpoint
+	Redirect(r, validate, logger)
 
 	// Endpoints starting with "/api/v1"
 	r.Route(fmt.Sprintf("/api/%s", ApiVersion), func(r chi.Router) {

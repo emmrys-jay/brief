@@ -3,6 +3,8 @@ package router
 import (
 	"brief/pkg/handler/user"
 	mdw "brief/pkg/middleware"
+	"brief/pkg/repository/storage/postgres"
+	userSrv "brief/service/user"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -12,7 +14,13 @@ import (
 // User registers user paths with router 'e'
 func User(r chi.Router, validate *validator.Validate, logger *log.Logger) chi.Router {
 
-	userCtrl := user.Controller{Validate: validate, Logger: logger}
+	// Use postgres database
+	pgDb := postgres.GetDB()
+	uService := userSrv.NewUserService(pgDb)
+	userCtrl := user.NewController(validate, logger, uService)
+
+	// Create admin user
+	uService.CreateAdminUser(logger)
 
 	// Free endpoints
 	r.Group(func(r chi.Router) {

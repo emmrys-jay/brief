@@ -15,8 +15,15 @@ import (
 )
 
 type Controller struct {
-	Validate *validator.Validate
-	Logger   *log.Logger
+	Validate      *validator.Validate
+	Logger        *log.Logger
+	HealthService ping.HealthService
+}
+
+func NewController(validate *validator.Validate, logger *log.Logger, hService ping.HealthService) *Controller {
+	return &Controller{
+		validate, logger, hService,
+	}
 }
 
 // Post godoc
@@ -49,7 +56,7 @@ func (base *Controller) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !ping.ReturnTrue() {
+	if !base.HealthService.ReturnTrue() {
 		rd := utility.BuildErrorResponse(http.StatusInternalServerError, "error", "ping failed", fmt.Errorf("ping failed"), nil)
 		res, _ := json.Marshal(rd)
 		w.WriteHeader(http.StatusBadRequest)
@@ -76,7 +83,7 @@ func (base *Controller) Post(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400	{object}	utility.Response
 //	@Router			/health [get]
 func (base *Controller) Get(w http.ResponseWriter, r *http.Request) {
-	if !ping.ReturnTrue() {
+	if !base.HealthService.ReturnTrue() {
 		rd := utility.BuildErrorResponse(http.StatusInternalServerError, "error", "ping failed", fmt.Errorf("ping failed"), nil)
 		res, _ := json.Marshal(rd)
 		w.WriteHeader(http.StatusBadRequest)

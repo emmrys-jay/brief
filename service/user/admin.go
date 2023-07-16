@@ -16,7 +16,7 @@ import (
 )
 
 // CreateAdminUser creates an admin user if one doesn't exist
-func CreateAdminUser(logger *log.Logger) error {
+func (u *userService) CreateAdminUser(logger *log.Logger) error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
