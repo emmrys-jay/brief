@@ -12,7 +12,7 @@ url of your choice.
 - [ ] Caching with Redis
 - [ ] Analytics
 - [x] Swagger Documentation
-- [ ] Postman Documentation
+- [x] Postman Documentation
 - [ ] Continuos Integration/Delivery (CI/CD)
 
 ## Requires
