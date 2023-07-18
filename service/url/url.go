@@ -68,7 +68,7 @@ func (u *urlService) Shorten(url *model.URL, ctxInfo *model.ContextInfo, r *http
 
 	// URL shortening logic
 	url.ID = uuid.NewString()
-	if ctxInfo != nil {
+	if ctxInfo != nil && ctxInfo.ID != "" {
 		url.UserID = ctxInfo.ID
 	} else {
 		url.UserID = config.GetConfig().AdminID
